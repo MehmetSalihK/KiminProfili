@@ -188,7 +188,7 @@ async function fetchInterpolNotices(type: 'red' | 'yellow' | 'un' = 'red'): Prom
             break;
           }
         }
-      } catch (_error) {
+      } catch {
         // Silent fail for individual country attempts
         continue;
       }
@@ -233,7 +233,7 @@ async function fetchInterpolNotices(type: 'red' | 'yellow' | 'un' = 'red'): Prom
       }
     }
 
-    return formatInterpolPerson(detailData, type);
+    return formatInterpolPerson(detailData);
 
   } catch (error) {
     console.error(`Interpol ${type} fetch error:`, error);
@@ -242,7 +242,7 @@ async function fetchInterpolNotices(type: 'red' | 'yellow' | 'un' = 'red'): Prom
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function formatInterpolPerson(person: any, _type: 'red' | 'yellow' | 'un' = 'red'): GameData {
+function formatInterpolPerson(person: any): GameData {
   // Use map or fallback
   // Person object from detail endpoint has slightly different structure than list item, but 'arrest_warrants' is key.
   
