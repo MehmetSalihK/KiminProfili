@@ -40,23 +40,65 @@ function translateCrime(crime: string | undefined): string {
   if (c.includes('leaving canada') && c.includes('terrorist')) return 'Terör örgütü faaliyeti amacıyla yurt dışına çıkış';
   if (c.includes('terrorist group') || c.includes('terrorist organization')) return 'Terör örgütü üyeliği veya yöneticiliği';
   if (c.includes('murder') && (c.includes('attempted'))) return 'Kasten öldürmeye teşebbüs';
+  if (c.includes('asesinato') && (c.includes('tentativa'))) return 'Kasten öldürmeye teşebbüs'; // Spanish attempt
   if (c.includes('trafficking') && c.includes('human')) return 'İnsan kaçakçılığı';
+  if (c.includes('trata') && c.includes('seres humanos')) return 'İnsan kaçakçılığı'; // Spanish human trafficking
   if (c.includes('sexual') && c.includes('child')) return 'Çocuğun cinsel istismarı';
   
-  // General Categories
-  if (c.includes('murder') || c.includes('kill') || c.includes('homicide') || c.includes('manslaughter')) return 'Cinayet / Kasten Öldürme';
-  if (c.includes('drug') || c.includes('narcotic') || c.includes('cocaine') || c.includes('cannabis') || c.includes('psychotropic')) return 'Uyuşturucu Madde Ticareti';
-  if (c.includes('fraud') || c.includes('laundering') || c.includes('financial') || c.includes('embezzlement') || c.includes('swindling')) return 'Dolandırıcılık ve Mali Suçlar';
-  if (c.includes('robbery') || c.includes('theft') || c.includes('burglary') || c.includes('larceny') || c.includes('stealing')) return 'Hırsızlık ve Soygun';
-  if (c.includes('terror')) return 'Terör Örgütü Faaliyetleri';
-  if (c.includes('rape') || c.includes('sexual') || c.includes('abuse')) return 'Cinsel Saldırı / İstismar';
-  if (c.includes('kidnap') || c.includes('abduction')) return 'Adam Kaçırma / Kişiyi Hürriyetinden Yoksun Kılma';
-  if (c.includes('assault') || c.includes('injury') || c.includes('wound')) return 'Kasten Yaralama / Darp';
-  if (c.includes('weapon') || c.includes('firearm') || c.includes('arms')) return 'Yasadışı Silah Ticareti';
-  if (c.includes('counterfeit') || c.includes('forgery')) return 'Sahtecilik';
-  if (c.includes('smuggling')) return 'Kaçakçılık';
+  // General Categories (English, Spanish, French)
+  
+  // Murder / Cinayet
+  if (c.includes('murder') || c.includes('kill') || c.includes('homicide') || c.includes('manslaughter') || 
+      c.includes('asesinato') || c.includes('homicidio') || c.includes('matar') || 
+      c.includes('meurtre') || c.includes('assassinat')) return 'Cinayet / Kasten Öldürme';
 
-  return 'Aranıyor';
+  // Drugs / Uyuşturucu
+  if (c.includes('drug') || c.includes('narcotic') || c.includes('cocaine') || c.includes('cannabis') || c.includes('psychotropic') ||
+      c.includes('droga') || c.includes('tráfico') || c.includes('trafico') || c.includes('cocaína') || c.includes('estupefacientes') ||
+      c.includes('stupéfiants') || c.includes('drogue')) return 'Uyuşturucu Madde Ticareti';
+
+  // Fraud / Dolandırıcılık
+  if (c.includes('fraud') || c.includes('laundering') || c.includes('financial') || c.includes('embezzlement') || c.includes('swindling') ||
+      c.includes('estafa') || c.includes('lavado') || c.includes('fraude') || c.includes('blanqueo') ||
+      c.includes('escroquerie') || c.includes('blanchiment')) return 'Dolandırıcılık ve Mali Suçlar';
+
+  // Theft / Hırsızlık
+  if (c.includes('robbery') || c.includes('theft') || c.includes('burglary') || c.includes('larceny') || c.includes('stealing') ||
+      c.includes('robo') || c.includes('hurto') || c.includes('latrocinio') ||
+      c.includes('vol')) return 'Hırsızlık ve Soygun';
+
+  // Terror / Terör
+  if (c.includes('terror')) return 'Terör Örgütü Faaliyetleri';
+
+  // Sexual / Cinsel
+  if (c.includes('rape') || c.includes('sexual') || c.includes('abuse') ||
+      c.includes('violación') || c.includes('violacion') || c.includes('abuso sexual') ||
+      c.includes('viol') || c.includes('sexuelle')) return 'Cinsel Saldırı / İstismar';
+
+  // Kidnapping / Kaçırma
+  if (c.includes('kidnap') || c.includes('abduction') ||
+      c.includes('secuestro') || c.includes('rapto') || c.includes('detención ilegal') ||
+      c.includes('enlèvement') || c.includes('sequestration')) return 'Adam Kaçırma / Kişiyi Hürriyetinden Yoksun Kılma';
+
+  // Assault / Yaralama
+  if (c.includes('assault') || c.includes('injury') || c.includes('wound') ||
+      c.includes('lesiones') || c.includes('heridas') || c.includes('agresión') ||
+      c.includes('violence') || c.includes('blessures')) return 'Kasten Yaralama / Darp';
+
+  // Arms / Silah
+  if (c.includes('weapon') || c.includes('firearm') || c.includes('arms') ||
+      c.includes('armas') || c.includes('ilícita de armas') ||
+      c.includes('armes')) return 'Yasadışı Silah Ticareti';
+
+  // Counterfeit / Sahtecilik
+  if (c.includes('counterfeit') || c.includes('forgery') ||
+      c.includes('falsificación') || c.includes('falsificacion') ||
+      c.includes('contrefaçon')) return 'Sahtecilik';
+
+  // Smuggling / Kaçakçılık
+  if (c.includes('smuggling') || c.includes('contrabando') || c.includes('contrabande')) return 'Kaçakçılık';
+
+  return (crime.length > 50) ? 'Aranıyor (Detaylar Gizli)' : crime;
 }
 
 // --- Logic ---
