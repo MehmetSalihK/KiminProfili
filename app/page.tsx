@@ -37,6 +37,21 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [gameState, gameMode]);
 
+  // Safety Timer: Force Offline Mode if loading takes too long
+  useEffect(() => {
+    let safetyTimer: NodeJS.Timeout;
+    if (gameState === 'LOADING') {
+      safetyTimer = setTimeout(() => {
+         console.warn('Safety Timer Triggered: Forcing Offline Mode');
+         const offlineData = getOfflineFallback();
+         setData(offlineData);
+         setGameState('PLAYING');
+         setIsFetching(false);
+      }, 7000); // 7 seconds max wait covering all timeouts
+    }
+    return () => clearTimeout(safetyTimer);
+  }, [gameState]);
+
   // Data Fetching
   const fetchData = async () => {
     setIsFetching(true);
