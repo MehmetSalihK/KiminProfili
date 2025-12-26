@@ -65,7 +65,7 @@ function translateCrime(crime: string | undefined): string {
 const getRandomInterpolFallbackClient = async (): Promise<GameData | null> => {
     try {
         console.log('Client: Using Simulated Interpol Fallback');
-        const res = await axios.get('https://randomuser.me/api/?nat=tr,us,gb,de,fr,ru,br');
+        const res = await axios.get('https://randomuser.me/api/?nat=tr,us,gb,de,fr,ru,br', { timeout: 3000 });
         if (res.data.results && res.data.results.length > 0) {
             const user = res.data.results[0];
             const countryName = COUNTRIES[user.nat] || user.location.country;
