@@ -349,6 +349,7 @@ export default function Home() {
                         className={`w-full h-full object-cover transition-all duration-700 ${gameState === 'RESULT' ? 'grayscale-0 contrast-100' : 'grayscale contrast-125 brightness-90 sepia-[.2]'}`}
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         priority
+                        unoptimized={true}
                       />
                       
                       {/* Overlays */}
