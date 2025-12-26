@@ -6,7 +6,7 @@ const rateLimit = new Map();
 
 export function middleware(request: NextRequest) {
   const response = NextResponse.next();
-  const ip = request.ip || request.headers.get('x-forwarded-for') || '127.0.0.1';
+  const ip = (request as any).ip || request.headers.get('x-forwarded-for') || '127.0.0.1';
 
   // --- 1. Security Headers (Privacy & Anti-Tracking) ---
   const headers = response.headers;
