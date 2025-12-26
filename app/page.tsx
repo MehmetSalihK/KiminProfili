@@ -587,7 +587,7 @@ export default function Home() {
                                 <li><strong>Sürüm v0.9 Beta:</strong> Bazı fotoğraf veya linkler çalışmayabilir.</li>
                                 <li><strong>Hata Payı:</strong> Çeşiti arama motorları kullanıldığı için %100 doğruluk garanti edilmez.</li>
                                 <li><strong>Veri Koruma:</strong> Kişisel hakları korumak adına bazı isimler ve fotoğraflar <em>yapay zeka veya rastgele verilerle</em> (RandomUser) değiştirilmiş olabilir.</li>
-                                <li><strong>GDPR/KVKK:</strong> Bu sistem hiçbir sunucuda veri saklamaz. Tamamen anonim çalışır.</li>
+                                <li><strong>GDPR/KVKK:</strong> Kişisel veri koruma yasaları LinkedIn (sivil) profilleri için geçerlidir. Interpol (suçlu) verileri ise uluslararası kamuya açık bültenlerdir.</li>
                             </ul>
                         </section>
 
