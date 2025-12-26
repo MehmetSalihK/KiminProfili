@@ -220,6 +220,15 @@ function formatInterpolPerson(person: any, _type: 'red' | 'yellow' | 'un' = 'red
   
 
 
+// Helper to ensure HTTPS
+function ensureHttps(url: string): string {
+  if (!url) return '';
+  if (url.startsWith('https://')) return url;
+  if (url.startsWith('http://')) return url.replace('http://', 'https://');
+  if (url.startsWith('//')) return `https:${url}`;
+  return url;
+}
+
 async function fetchLinkedInData(): Promise<GameData | null> {
     
     // Helper to get random user fallback
@@ -238,7 +247,7 @@ async function fetchLinkedInData(): Promise<GameData | null> {
                         fullName: `${user.name.first} ${user.name.last}`,
                         detail: randomJob.tr,
                         country: countryName,
-                        photoUrl: user.picture.large,
+                        photoUrl: ensureHttps(user.picture.large),
                         realLink: 'https://linkedin.com/' // Fake link since it's generated
                     }
                 };
