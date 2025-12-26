@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import axios from 'axios';
 import { GameData, GoogleSearchResponse } from '@/app/types';
 
@@ -8,7 +8,69 @@ export const dynamic = 'force-dynamic';
 const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
 const GOOGLE_CX = process.env.GOOGLE_CX;
 
-// --- Dictionaries & Maps ---
+// ... (Rest of file unchanged)
+
+
+// --- Main Handler ---
+
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const source = searchParams.get('source');
+
+  // Coin Toss: If source is 'linkedin', force it. Else random.
+  const isInterpol = source === 'linkedin' ? false : Math.random() < 0.5;
+
+  let result: GameData | null = null;
+
+  try { 
+    if (isInterpol) {
+      // Try Real Interpol Sources
+      result = await fetchInterpolNotices('red');
+      
+      if (!result) {
+          console.log('Red notices failed, trying Yellow notices...');
+          result = await fetchInterpolNotices('yellow');
+      }
+      
+      if (!result) {
+          console.log('Yellow notices failed, trying UN notices...');
+          result = await fetchInterpolNotices('un');
+      }
+
+      // If Real Interpol fails completely, use SIMULATED Interpol
+      if (!result) {
+          console.warn('All Interpol APIs failed/empty. Switching to SIMULATED Interpol data.');
+          result = await getRandomInterpolFallback();
+      }
+
+    } else {
+      // Linkedin / Professional Path
+      result = await fetchLinkedInData();
+    }
+
+    // Final safety check
+    if (!result) {
+       // Only fallback if we are NOT forced to linkedin (if we are forced, we already tried and failed inside fetchLinkedInData probably)
+       // Actually fetchLinkedInData handles RandomUser fallback internally.
+       if (isInterpol) {
+           // If interpol failed (simulated also failed?), try linkedin as last resort
+            result = await fetchLinkedInData();
+       }
+    }
+
+
+    if (!result) {
+      return NextResponse.json({ error: 'Veri alınamadı' }, { status: 500 });
+    }
+
+    return NextResponse.json(result);
+  } catch {
+      return NextResponse.json(
+          { error: 'Internal Server Error' },
+          { status: 500 }
+      );
+  }
+}
 
 const COUNTRIES: Record<string, string> = {
   'TR': 'Türkiye', 'DE': 'Almanya', 'GB': 'Birleşik Krallık', 'US': 'Amerika Birleşik Devletleri',
@@ -362,58 +424,4 @@ const getRandomInterpolFallback = async (): Promise<GameData | null> => {
 
 // --- Main Handler ---
 
-export async function GET() {
-  // Coin Toss
-  const isInterpol = Math.random() < 0.5;
 
-  let result: GameData | null = null;
-
-  try { 
-    if (isInterpol) {
-      // Try Real Interpol Sources
-      result = await fetchInterpolNotices('red');
-      
-      if (!result) {
-          console.log('Red notices failed, trying Yellow notices...');
-          result = await fetchInterpolNotices('yellow');
-      }
-      
-      if (!result) {
-          console.log('Yellow notices failed, trying UN notices...');
-          result = await fetchInterpolNotices('un');
-      }
-
-      // If Real Interpol fails completely, use SIMULATED Interpol
-      // This ensures 50/50 balance is maintained even if API is down
-      if (!result) {
-          console.warn('All Interpol APIs failed/empty. Switching to SIMULATED Interpol data.');
-          result = await getRandomInterpolFallback();
-      }
-
-    } else {
-      // Linkedin / Professional Path
-      result = await fetchLinkedInData();
-    }
-
-    // Final safety check
-    if (!result) {
-      // If simulated interpolation also failed (unlikely), try linkedin fallback
-      // But we prefer maintaining the type if possible.
-      // At this point, if result is null, something is very wrong with RandomUser API.
-      // We'll try one last desperation fetch
-       result = await fetchLinkedInData();
-    }
-
-
-    if (!result) {
-      return NextResponse.json({ error: 'Veri alınamadı' }, { status: 500 });
-    }
-
-    return NextResponse.json(result);
-  } catch {
-      return NextResponse.json(
-          { error: 'Internal Server Error' },
-          { status: 500 }
-      );
-  }
-}

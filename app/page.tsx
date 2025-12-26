@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Briefcase, Siren, Globe, RefreshCw, X, Check, ExternalLink, ArrowRight, Timer, ListOrdered, Trophy, Play, Settings2, Instagram } from 'lucide-react';
 import { GameData } from './types';
+import { fetchInterpolFrontend } from './client-game';
 
 export default function Home() {
   const [gameState, setGameState] = useState<'MENU' | 'LOADING' | 'PLAYING' | 'RESULT' | 'SUMMARY' | 'ERROR'>('MENU');
@@ -40,17 +41,41 @@ export default function Home() {
   const fetchData = async () => {
     setIsFetching(true);
     
-    // Only show full loading screen on initial start (from Menu/Summary/Error)
+    // Only show full loading screen on initial start
     if (gameState === 'MENU' || gameState === 'SUMMARY' || gameState === 'ERROR') {
         setGameState('LOADING');
     }
 
     try {
-      const res = await axios.get<GameData>('/api/game');
-      setData(res.data);
+      let newData: GameData | null = null;
       
-      // Always switch to PLAYING on success
-      setGameState('PLAYING');
+      // 50% Client-Side Interpol (Bypass IP Block)
+      // 50% Server-Side LinkedIn (Secure Keys)
+      const isInterpol = Math.random() < 0.5;
+
+      if (isInterpol) {
+          try {
+             newData = await fetchInterpolFrontend();
+          } catch (e) {
+             console.warn("Client Interpol failed:", e);
+          }
+      }
+
+      // Fallback/LinkedIn path
+      if (!newData) {
+          const res = await axios.get<GameData>('/api/game?source=linkedin');
+          newData = res.data;
+      }
+
+      if (newData) {
+          setData(newData);
+          if (gameState === 'LOADING') {
+             setGameState('PLAYING');
+          }
+      } else {
+          throw new Error("No data received");
+      }
+
     } catch (error) {
       console.error('API Error:', error);
       setGameState('ERROR');
