@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Briefcase, Siren, Globe, RefreshCw, X, Check, ExternalLink, ArrowRight, Timer, ListOrdered, Trophy, Play, Settings2 } from 'lucide-react';
+import { Briefcase, Siren, Globe, RefreshCw, X, Check, ExternalLink, ArrowRight, Timer, ListOrdered, Trophy, Play, Settings2, Instagram } from 'lucide-react';
 import { GameData } from './types';
 
 export default function Home() {
@@ -40,9 +40,8 @@ export default function Home() {
   const fetchData = async () => {
     setIsFetching(true);
     
-    // Only show full loading screen if NOT in Timed mode rapid-fire
-    // If we are starting fresh (MENU/SUMMARY), we show LOADING but maybe fast.
-    if (gameMode !== 'TIMED' || gameState !== 'PLAYING') {
+    // Only show full loading screen on initial start (from Menu/Summary/Error)
+    if (gameState === 'MENU' || gameState === 'SUMMARY' || gameState === 'ERROR') {
         setGameState('LOADING');
     }
 
@@ -50,12 +49,8 @@ export default function Home() {
       const res = await axios.get<GameData>('/api/game');
       setData(res.data);
       
-      if (gameMode === 'TIMED') {
-          setGameState('PLAYING'); // Instant
-      } else {
-          // Cinematic delay for Quantity Mode
-          setTimeout(() => setGameState('PLAYING'), 800);
-      }
+      // Always switch to PLAYING on success
+      setGameState('PLAYING');
     } catch (error) {
       console.error('API Error:', error);
       setGameState('ERROR');
@@ -116,6 +111,7 @@ export default function Home() {
     }
 
     setUserGuess(null);
+    setGameState('PLAYING'); // Close result screen immediately for instant feel
     fetchData();
   };
 
@@ -157,6 +153,16 @@ export default function Home() {
       </button>
       </motion.header>
 
+      {/* SOCIAL LINK */}
+      <a 
+        href="https://www.instagram.com/sketur60/" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="fixed bottom-6 left-6 z-50 p-3 bg-slate-900/80 backdrop-blur-md border border-white/10 rounded-full text-slate-400 hover:text-pink-500 hover:border-pink-500/50 hover:bg-pink-500/10 transition-all shadow-xl"
+      >
+          <Instagram size={20} />
+      </a>
+
       {/* MAIN CONTENT AREA */}
       <div className="relative z-10 w-full min-h-screen flex flex-col items-center justify-center p-4 pt-24 md:pt-28 pb-8">
         <AnimatePresence mode="wait">
@@ -175,20 +181,40 @@ export default function Home() {
                 </div>
 
                 {/* INFO & DISCLAIMER - MOVED TO TOP */}
-                <div className="space-y-4 mb-8">
-                    <div className="grid grid-cols-2 gap-4 text-center">
-                         <div className="bg-slate-950/50 p-3 rounded-lg border border-slate-800">
-                             <Briefcase size={20} className="text-cyan-400 mx-auto mb-1"/>
-                             <div className="text-[10px] font-bold text-cyan-400">LINKEDIN</div>
-                             <div className="text-[9px] text-slate-500">Sivil Profesyonel</div>
-                         </div>
-                         <div className="bg-slate-950/50 p-3 rounded-lg border border-slate-800">
-                             <Siren size={20} className="text-red-500 mx-auto mb-1"/>
-                             <div className="text-[10px] font-bold text-red-500">INTERPOL</div>
-                             <div className="text-[9px] text-slate-500">Aranan Şahıs</div>
-                         </div>
+                {/* HOW TO PLAY & INFO */}
+                <div className="space-y-6 mb-8">
+                    {/* Steps */}
+                    <div className="bg-slate-950/40 rounded-2xl p-4 border border-white/5">
+                        <h3 className="text-cyan-500 text-xs font-bold tracking-widest mb-4 flex items-center gap-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse"></span>
+                            NASIL OYNANIR?
+                        </h3>
+                        <div className="space-y-4">
+                            <div className="flex items-start gap-3">
+                                <div className="p-2 bg-slate-900 rounded-lg border border-slate-800 text-cyan-400">
+                                    <Globe size={16} />
+                                </div>
+                                <div>
+                                    <h4 className="text-white text-xs font-bold mb-0.5">1. Fotoğrafı Analiz Et</h4>
+                                    <p className="text-[10px] text-slate-500 leading-tight">Ekrana gelen profil fotoğrafını dikkatlice incele.</p>
+                                </div>
+                            </div>
+                            
+                            <div className="flex items-start gap-3">
+                                <div className="p-2 bg-slate-900 rounded-lg border border-slate-800 text-yellow-500">
+                                    <Siren size={16} />
+                                </div>
+                                <div>
+                                    <h4 className="text-white text-xs font-bold mb-0.5">2. Kararını Ver</h4>
+                                    <p className="text-[10px] text-slate-500 leading-tight">
+                                        <span className="text-cyan-400 font-bold">LINKEDIN</span> (Sivil) mi yoksa <span className="text-red-500 font-bold">INTERPOL</span> (Suçlu) mu?
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     
+                    {/* Disclaimer */}
                     <div className="bg-slate-950/30 p-3 rounded-lg text-left border-l-2 border-yellow-500/50">
                         <p className="text-[10px] text-slate-400 font-mono leading-relaxed opacity-70">
                             <span className="text-yellow-500 font-bold">⚠️ SİSTEM NOTU:</span> Veriler LinkedIn ve Interpol API&apos;lerinden anlık çekilmektedir. Bu site bir eğitim/demo projesidir (GDPR/KVKK uyumlu). Gerçek istihbarat aracı değildir.
@@ -254,6 +280,12 @@ export default function Home() {
                 >
                     {isFetching ? <RefreshCw className="animate-spin" /> : <><Play size={20} fill="currentColor" /> BAŞLAT</>}
                 </button>
+                
+                <div className="mt-6 text-center">
+                    <p className="text-[10px] text-white font-mono tracking-widest uppercase opacity-70">
+                        v0.9 BETA - ERKEN ERİŞİM DEMO SÜRÜMÜ
+                    </p>
+                </div>
               </div>
             </motion.div>
           )}
@@ -271,10 +303,6 @@ export default function Home() {
                     <div className="absolute inset-4 bg-slate-800 rounded-full flex items-center justify-center shadow-inner">
                         <RefreshCw className="text-cyan-500 animate-spin" size={32} />
                     </div>
-                </div>
-                <div className="text-center space-y-2">
-                    <p className="text-cyan-400 text-sm font-bold tracking-[0.3em] animate-pulse">VERİTABANI EŞLEŞTİRİLİYOR</p>
-                    <p className="text-slate-500 text-xs font-mono">Şifreli bağlantı kuruluyor...</p>
                 </div>
             </motion.div>
           )}
@@ -318,8 +346,9 @@ export default function Home() {
                         src={data.data.photoUrl} 
                         alt="Target"
                         fill
-                        className="w-full h-full object-cover transition-all duration-700 grayscale-[0.2] group-hover:grayscale-0"
+                        className={`w-full h-full object-cover transition-all duration-700 ${gameState === 'RESULT' ? 'grayscale-0 contrast-100' : 'grayscale contrast-125 brightness-90 sepia-[.2]'}`}
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        priority
                       />
                       
                       {/* Overlays */}
