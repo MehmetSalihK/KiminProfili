@@ -390,7 +390,7 @@ export default function Home() {
                   <div className="relative bg-slate-900 border border-slate-700 rounded-[2rem] overflow-hidden shadow-2xl aspect-[4/5] transform transition-transform duration-500 group-hover:scale-[1.01]">
                       {/* Image */}
                       <Image 
-                        src={data.data.photoUrl} 
+                        src={data.data.photoUrl || 'https://placehold.co/400x500/1e293b/ffffff.png?text=?'} 
                         alt="Target"
                         fill
                         className={`w-full h-full object-cover transition-all duration-700 ${gameState === 'RESULT' ? 'grayscale-0 contrast-100' : 'grayscale contrast-125 brightness-90 sepia-[.2]'}`}
