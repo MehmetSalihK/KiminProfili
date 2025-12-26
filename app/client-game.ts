@@ -177,3 +177,54 @@ export async function fetchInterpolFrontend(): Promise<GameData | null> {
         return getRandomInterpolFallbackClient();
     }
 }
+
+
+// --- Offline / Static Fallback (Nuclear Option) ---
+const STATIC_NAMES = [
+    'Ahmet Yılmaz', 'Mehmet Demir', 'Ayşe Kaya', 'Fatma Çelik', 'Mustafa Şahin', 
+    'Zeynep Yıldız', 'Emre Öztürk', 'Elif Arslan', 'Burak Doğan', 'Selin Aydın'
+];
+const STATIC_PHOTOS = [
+    'https://randomuser.me/api/portraits/men/32.jpg',
+    'https://randomuser.me/api/portraits/women/44.jpg',
+    'https://randomuser.me/api/portraits/men/85.jpg',
+    'https://randomuser.me/api/portraits/women/65.jpg',
+    'https://randomuser.me/api/portraits/men/22.jpg',
+    'https://randomuser.me/api/portraits/women/12.jpg'
+];
+
+export function getOfflineFallback(): GameData {
+    console.warn('Client: Activating OFFLINE MODE (Nuclear Fallback)');
+    const name = getRandomItem(STATIC_NAMES);
+    const photo = getRandomItem(STATIC_PHOTOS);
+    const country = getRandomItem(['Türkiye', 'Almanya', 'Fransa', 'Amerika', 'İngiltere']);
+    
+    // 50/50 Chance
+    if (Math.random() < 0.5) {
+        // Interpol
+        const crime = getRandomItem(FALLBACK_CRIMES);
+        return {
+            type: 'INTERPOL',
+            data: {
+                fullName: name,
+                detail: crime,
+                country: country,
+                photoUrl: photo,
+                realLink: 'https://interpol.int'
+            }
+        };
+    } else {
+        // LinkedIn
+        const safeJobs = ['Yazılım Mühendisi', 'Satış Danışmanı', 'İK Uzmanı', 'Grafik Tasarımcı', 'Öğretmen', 'Mimar', 'Doktor'];
+        return {
+            type: 'LINKEDIN',
+            data: {
+                fullName: name,
+                detail: getRandomItem(safeJobs),
+                country: country,
+                photoUrl: photo,
+                realLink: 'https://linkedin.com'
+            }
+        };
+    }
+}

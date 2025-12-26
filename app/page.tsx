@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Briefcase, Siren, Globe, RefreshCw, X, Check, ExternalLink, ArrowRight, Timer, ListOrdered, Trophy, Play, Settings2, Instagram } from 'lucide-react';
 import { GameData } from './types';
-import { fetchInterpolFrontend } from './client-game';
+import { fetchInterpolFrontend, getOfflineFallback } from './client-game';
 
 export default function Home() {
   const [gameState, setGameState] = useState<'MENU' | 'LOADING' | 'PLAYING' | 'RESULT' | 'SUMMARY' | 'ERROR'>('MENU');
@@ -63,7 +63,8 @@ export default function Home() {
 
       // Fallback/LinkedIn path
       if (!newData) {
-          const res = await axios.get<GameData>('/api/game?source=linkedin');
+          // Add timeout to server request to prevent hanging
+          const res = await axios.get<GameData>('/api/game?source=linkedin', { timeout: 10000 });
           newData = res.data;
       }
 
@@ -77,8 +78,14 @@ export default function Home() {
       }
 
     } catch (error) {
-      console.error('API Error:', error);
-      setGameState('ERROR');
+      console.error('API Error, activating Offline Mode:', error);
+      // Nuclear Fallback: Ensure game ALWAYS loads
+      const offlineData = getOfflineFallback();
+      setData(offlineData);
+      
+      if (gameState === 'LOADING') {
+             setGameState('PLAYING');
+      }
     } finally {
       setIsFetching(false);
     }
