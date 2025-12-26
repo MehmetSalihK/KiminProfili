@@ -325,6 +325,41 @@ async function fetchLinkedInData(): Promise<GameData | null> {
 
 
 
+// Helper to get random INTERPOL fallback (Simulated)
+const getRandomInterpolFallback = async (): Promise<GameData | null> => {
+    try {
+        console.log('Using RandomUser.me fallback for INTERPOL data');
+        const res = await axios.get('https://randomuser.me/api/?nat=tr,us,gb,de,fr,ru,br');
+        if (res.data.results && res.data.results.length > 0) {
+            const user = res.data.results[0];
+            const countryName = COUNTRIES[user.nat] || user.location.country;
+            
+            const FALLBACK_CRIMES = [
+                'Kasten Öldürme', 'Uyuşturucu Madde Ticareti', 'Silahlı Soygun', 
+                'Nitelikli Dolandırıcılık', 'Terör Örgütü Üyeliği', 'İnsan Kaçakçılığı', 
+                'Bilişim Sistemleri Aracılığıyla Hırsızlık', 'Kara Para Aklama',
+                'Organize Suç Örgütü Yöneticiliği', 'Casusluk'
+            ];
+            const randomCrime = getRandomItem(FALLBACK_CRIMES);
+
+            return {
+                type: 'INTERPOL',
+                data: {
+                    fullName: `${user.name.first} ${user.name.last}`,
+                    detail: randomCrime,
+                    country: countryName,
+                    photoUrl: ensureHttps(user.picture.large),
+                    realLink: 'https://interpol.int/' // Fake link
+                }
+            };
+        }
+    } catch (e) {
+        console.error('RandomInterpol fallback failed:', e);
+    }
+    return null; 
+};
+
+
 // --- Main Handler ---
 
 export async function GET() {
@@ -333,34 +368,40 @@ export async function GET() {
 
   let result: GameData | null = null;
 
-  try { // Added try-catch for the whole GET function
+  try { 
     if (isInterpol) {
-      // Try Red Notices first
+      // Try Real Interpol Sources
       result = await fetchInterpolNotices('red');
       
-      // Fallback to Yellow (Missing)
       if (!result) {
           console.log('Red notices failed, trying Yellow notices...');
           result = await fetchInterpolNotices('yellow');
       }
       
-      // Fallback to UN (Sanctions)
       if (!result) {
           console.log('Yellow notices failed, trying UN notices...');
           result = await fetchInterpolNotices('un');
       }
+
+      // If Real Interpol fails completely, use SIMULATED Interpol
+      // This ensures 50/50 balance is maintained even if API is down
+      if (!result) {
+          console.warn('All Interpol APIs failed/empty. Switching to SIMULATED Interpol data.');
+          result = await getRandomInterpolFallback();
+      }
+
     } else {
+      // Linkedin / Professional Path
       result = await fetchLinkedInData();
     }
 
-    // Cross-fallback
-    if (!result && isInterpol) {
-        result = await fetchLinkedInData(); 
-    } else if (!result && !isInterpol) {
-        // Try Red -> Yellow -> UN
-        result = await fetchInterpolNotices('red');
-        if (!result) result = await fetchInterpolNotices('yellow');
-        if (!result) result = await fetchInterpolNotices('un');
+    // Final safety check
+    if (!result) {
+      // If simulated interpolation also failed (unlikely), try linkedin fallback
+      // But we prefer maintaining the type if possible.
+      // At this point, if result is null, something is very wrong with RandomUser API.
+      // We'll try one last desperation fetch
+       result = await fetchLinkedInData();
     }
 
 
