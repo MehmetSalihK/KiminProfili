@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Briefcase, Siren, Globe, RefreshCw, X, Check, ExternalLink, ArrowRight, Timer, ListOrdered, Trophy, Play, Settings2, Instagram } from 'lucide-react';
+import { Briefcase, Siren, Globe, RefreshCw, X, Check, ExternalLink, ArrowRight, Timer, ListOrdered, Trophy, Play, Settings2, Instagram, Info } from 'lucide-react';
 import { GameData } from './types';
 import { fetchInterpolFrontend, getOfflineFallback } from './client-game';
 
@@ -19,6 +19,7 @@ export default function Home() {
   const [data, setData] = useState<GameData | null>(null);
   const [userGuess, setUserGuess] = useState<'INTERPOL' | 'LINKEDIN' | null>(null);
   const [isFetching, setIsFetching] = useState<boolean>(false);
+  const [showInfo, setShowInfo] = useState<boolean>(false);
 
   // Timer Logic
   useEffect(() => {
@@ -327,6 +328,13 @@ export default function Home() {
                 >
                     {isFetching ? <RefreshCw className="animate-spin" /> : <><Play size={20} fill="currentColor" /> BAŞLAT</>}
                 </button>
+
+                <button 
+                    onClick={() => setShowInfo(true)}
+                    className="mt-4 w-full py-3 bg-slate-800/50 hover:bg-slate-700/50 text-slate-400 hover:text-white font-bold rounded-xl transition-all border border-slate-700 hover:border-slate-500 flex items-center justify-center gap-2 text-sm"
+                >
+                    <Info size={16} /> BİLGİ & GÜVENLİK (OKU)
+                </button>
                 
                 <div className="mt-6 text-center">
                     <p className="text-[10px] text-white font-mono tracking-widest uppercase opacity-70">
@@ -543,6 +551,83 @@ export default function Home() {
           )}
 
         </AnimatePresence>
+        {showInfo && (
+            <motion.div 
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+            >
+                <div className="bg-slate-900 border border-slate-700 max-w-2xl w-full max-h-[80vh] overflow-y-auto rounded-3xl p-8 relative shadow-2xl">
+                    <button onClick={() => setShowInfo(false)} className="absolute top-6 right-6 p-2 bg-slate-800 rounded-full hover:bg-red-500 hover:text-white transition-colors">
+                        <X size={20} />
+                    </button>
+
+                    <h2 className="text-2xl font-black font-orbitron text-white mb-6 flex items-center gap-3">
+                        <Info className="text-cyan-500" /> SİSTEM BİLGİSİ
+                    </h2>
+
+                    <div className="space-y-6 text-slate-300 text-sm leading-relaxed">
+                        
+                        {/* 1. Oyun Hakkında */}
+                        <section className="bg-slate-950/50 p-4 rounded-xl border border-white/5">
+                            <h3 className="text-white font-bold mb-2 flex items-center gap-2 decoration-cyan-500 underline decoration-2 underline-offset-4">
+                                🎮 OYUN HAKKINDA
+                            </h3>
+                            <p>
+                                <strong>Vatandaş Kontrol</strong>, açık kaynak istihbarat (OSINT) yöntemlerini simüle eden bir oyundur. 
+                                Amacınız, ekrana gelen profilin masum bir sivil mi (LinkedIn profili) yoksa aranan bir suçlu mu (Interpol bülteni) olduğunu analiz etmektir.
+                            </p>
+                        </section>
+
+                        {/* 2. Beta & Veri */}
+                        <section className="bg-yellow-950/20 p-4 rounded-xl border border-yellow-500/20">
+                            <h3 className="text-yellow-400 font-bold mb-2 flex items-center gap-2">
+                                ⚠️ BETA & VERİ GİZLİLİĞİ
+                            </h3>
+                            <ul className="list-disc list-inside space-y-1 opacity-80 decoration-yellow-500/50">
+                                <li><strong>Sürüm v0.9 Beta:</strong> Bazı fotoğraf veya linkler çalışmayabilir.</li>
+                                <li><strong>Hata Payı:</strong> Çeşiti arama motorları kullanıldığı için %100 doğruluk garanti edilmez.</li>
+                                <li><strong>Veri Koruma:</strong> Kişisel hakları korumak adına bazı isimler ve fotoğraflar <em>yapay zeka veya rastgele verilerle</em> (RandomUser) değiştirilmiş olabilir.</li>
+                                <li><strong>GDPR/KVKK:</strong> Bu sistem hiçbir sunucuda veri saklamaz. Tamamen anonim çalışır.</li>
+                            </ul>
+                        </section>
+
+                        {/* 3. Güvenlik Modu */}
+                        <section className="bg-green-950/20 p-4 rounded-xl border border-green-500/20">
+                            <h3 className="text-green-400 font-bold mb-2 flex items-center gap-2">
+                                🛡️ GÜVENLİK MODU AKTİF
+                            </h3>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                <div className="p-3 bg-slate-950 rounded-lg text-xs">
+                                    <strong className="block text-white mb-1">🚫 Anti-DDoS</strong>
+                                    Aşırı istek koruması ve Rate Limiting devrede.
+                                </div>
+                                <div className="p-3 bg-slate-950 rounded-lg text-xs">
+                                    <strong className="block text-white mb-1">🕵️ Anti-Hacker</strong>
+                                    F12, Sağ Tık ve Kod İnceleme engellendi.
+                                </div>
+                                <div className="p-3 bg-slate-950 rounded-lg text-xs">
+                                    <strong className="block text-white mb-1">🔒 Tam Gizlilik</strong>
+                                    No-Log, No-Cookie. İz bırakmaz.
+                                </div>
+                            </div>
+                        </section>
+
+                         {/* 4. Credits */}
+                         <section className="text-center pt-4 border-t border-white/5">
+                            <p className="text-slate-500 font-mono text-xs mb-2">GELİŞTİRİCİ</p>
+                            <a 
+                                href="https://www.instagram.com/sketur60/" 
+                                target="_blank" 
+                                className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-2 rounded-full font-bold hover:scale-105 transition-transform"
+                            >
+                                <Instagram size={18} /> @sketur60
+                            </a>
+                        </section>
+
+                    </div>
+                </div>
+            </motion.div>
+        )}
       </div>
     </main>
   );
