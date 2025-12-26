@@ -91,34 +91,38 @@ const getRandomInterpolFallbackClient = async (): Promise<GameData | null> => {
 // Real Client-Side Fetch
 export async function fetchInterpolFrontend(): Promise<GameData | null> {
     try {
-        // Try random country first
-        const countriesToTry = [getRandomItem(Object.keys(COUNTRIES)), 'TR', 'US', 'FR', 'DE', 'GB'];
         let notices: any[] = [];
         const type = 'red';
+        
+        // Optimize: Try only ONE random country to save time, then fallback to global.
+        const randomCountry = getRandomItem(Object.keys(COUNTRIES));
 
         // 1. Specific Country
-        for (const country of countriesToTry) {
-             if (notices.length > 0) break;
-             try {
-                // Client-side fetch
-                const res = await axios.get(`https://ws-public.interpol.int/notices/v1/${type}?nationality=${country}&resultPerPage=200&page=1`);
-                if (res.data._embedded?.notices) {
-                    notices = res.data._embedded.notices;
-                }
-             } catch { continue; }
+        try {
+            console.log(`Client: Fetching Interpol for ${randomCountry}`);
+            const res = await axios.get(`https://ws-public.interpol.int/notices/v1/${type}?nationality=${randomCountry}&resultPerPage=200&page=1`, { timeout: 4000 });
+            if (res.data._embedded?.notices) {
+                notices = res.data._embedded.notices;
+            }
+        } catch { 
+            // Silent fail
         }
 
         // 2. Global if failed
         if (notices.length === 0) {
              try {
-                const res = await axios.get(`https://ws-public.interpol.int/notices/v1/${type}?resultPerPage=200`);
+                console.log('Client: Fetching Global Interpol');
+                const res = await axios.get(`https://ws-public.interpol.int/notices/v1/${type}?resultPerPage=200`, { timeout: 4000 });
                 if (res.data._embedded?.notices) {
                     notices = res.data._embedded.notices;
                 }
-             } catch (e) { console.error('Client: Global fetch failed', e); }
+             } catch (e) { 
+                 console.warn('Client: Global fetch failed', e); 
+             }
         }
 
         if (notices.length === 0) {
+            console.warn('Client: No notices found, using fallback');
             return getRandomInterpolFallbackClient();
         }
 
@@ -129,9 +133,11 @@ export async function fetchInterpolFrontend(): Promise<GameData | null> {
         let detailData = person;
         if (person._links?.self?.href) {
             try {
-                const detailRes = await axios.get(person._links.self.href);
+                const detailRes = await axios.get(person._links.self.href, { timeout: 4000 });
                 detailData = detailRes.data;
-            } catch { console.warn('Client: Detail fetch failed'); }
+            } catch { 
+                console.warn('Client: Detail fetch failed, using summary data'); 
+            }
         }
 
         // Format
@@ -140,10 +146,6 @@ export async function fetchInterpolFrontend(): Promise<GameData | null> {
             crime = detailData.arrest_warrants[0].charge;
         }
         
-        // Use thumbnail or safe image from details. 
-        // Interpol details usually have `_links.thumbnail.href` or `_links.picture.href`?
-        // Actually notices list item has `_links.thumbnail`. Details has images in `_links`.
-        // We use thumbnail often.
         const photo = person._links?.thumbnail?.href || detailData._links?.thumbnail?.href;
 
         return {
@@ -151,7 +153,7 @@ export async function fetchInterpolFrontend(): Promise<GameData | null> {
             data: {
                 fullName: `${detailData.forename || ''} ${detailData.name || ''}`.trim(),
                 detail: translateCrime(crime),
-                country: detailData.country_of_birth_id || 'Bilinmiyor', // Map code later if needed, or use country logic
+                country: detailData.country_of_birth_id || 'Bilinmiyor',
                 photoUrl: ensureHttps(photo),
                 realLink: `https://www.interpol.int/en/How-we-work/Notices/Red-Notices/View-Red-Notices#${person.entity_id ? person.entity_id.replace('/', '-') : ''}`
             }
