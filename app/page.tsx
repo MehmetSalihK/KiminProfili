@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Briefcase, Siren, Globe, RefreshCw, X, Check, ExternalLink, ArrowRight, Timer, ListOrdered, Trophy, Play, Settings2, Instagram, Info } from 'lucide-react';
+import { Briefcase, Siren, Globe, RefreshCw, X, Check, ExternalLink, ArrowRight, Timer, ListOrdered, Trophy, Play, Settings2, Instagram, Info, Github } from 'lucide-react';
 import { GameData } from './types';
 import { fetchInterpolFrontend, getOfflineFallback } from './client-game';
 
@@ -614,14 +614,23 @@ export default function Home() {
 
                          {/* 4. Credits */}
                          <section className="text-center pt-4 border-t border-white/5">
-                            <p className="text-slate-500 font-mono text-xs mb-2">GELİŞTİRİCİ</p>
-                            <a 
-                                href="https://www.instagram.com/sketur60/" 
-                                target="_blank" 
-                                className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-2 rounded-full font-bold hover:scale-105 transition-transform"
-                            >
-                                <Instagram size={18} /> @sketur60
-                            </a>
+                            <p className="text-slate-500 font-mono text-xs mb-4">GELİŞTİRİCİ & AÇIK KAYNAK</p>
+                            <div className="flex flex-wrap justify-center gap-4">
+                                <a 
+                                    href="https://www.instagram.com/sketur60/" 
+                                    target="_blank" 
+                                    className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-2 rounded-full font-bold hover:scale-105 transition-transform shadow-lg shadow-purple-900/20"
+                                >
+                                    <Instagram size={18} /> @sketur60
+                                </a>
+                                <a 
+                                    href="https://github.com/MehmetSalihK/KiminProfili" 
+                                    target="_blank" 
+                                    className="inline-flex items-center gap-2 bg-slate-800 text-white px-6 py-2 rounded-full font-bold hover:bg-slate-700 hover:scale-105 transition-all border border-slate-600 shadow-lg"
+                                >
+                                    <Github size={18} /> Source Code
+                                </a>
+                            </div>
                         </section>
 
                     </div>
