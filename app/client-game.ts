@@ -88,10 +88,23 @@ const getRandomInterpolFallbackClient = async (): Promise<GameData | null> => {
     return null;
 };
 
+// Interpol Interface
+interface InterpolNotice {
+  entity_id?: string;
+  forename?: string;
+  name?: string;
+  _links?: {
+    self?: { href: string };
+    thumbnail?: { href: string };
+  };
+  arrest_warrants?: { charge: string }[];
+  country_of_birth_id?: string;
+}
+
 // Real Client-Side Fetch
 export async function fetchInterpolFrontend(): Promise<GameData | null> {
     try {
-        let notices: any[] = [];
+        let notices: InterpolNotice[] = [];
         const type = 'red';
         
         // Optimize: Try only ONE random country to save time, then fallback to global.
@@ -130,7 +143,7 @@ export async function fetchInterpolFrontend(): Promise<GameData | null> {
         const person = getRandomItem(notices);
         
         // Fetch Details (Self Link)
-        let detailData = person;
+        let detailData: InterpolNotice = person;
         if (person._links?.self?.href) {
             try {
                 const detailRes = await axios.get(person._links.self.href, { timeout: 4000 });
@@ -154,7 +167,7 @@ export async function fetchInterpolFrontend(): Promise<GameData | null> {
                 fullName: `${detailData.forename || ''} ${detailData.name || ''}`.trim(),
                 detail: translateCrime(crime),
                 country: detailData.country_of_birth_id || 'Bilinmiyor',
-                photoUrl: ensureHttps(photo),
+                photoUrl: ensureHttps(photo || ''),
                 realLink: `https://www.interpol.int/en/How-we-work/Notices/Red-Notices/View-Red-Notices#${person.entity_id ? person.entity_id.replace('/', '-') : ''}`
             }
         };
