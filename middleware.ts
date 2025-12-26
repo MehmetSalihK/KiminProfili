@@ -6,6 +6,7 @@ const rateLimit = new Map();
 
 export function middleware(request: NextRequest) {
   const response = NextResponse.next();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const ip = (request as any).ip || request.headers.get('x-forwarded-for') || '127.0.0.1';
 
   // --- 1. Security Headers (Privacy & Anti-Tracking) ---
